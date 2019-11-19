@@ -8,10 +8,15 @@ class Steganography {
 
     static void main(String[] args) {
         // Run this to test if your configuration works properly
-        byte[] data = [0b10100101 as byte]
-        String path = PROJECT_PATH + "\\data\\input\\test-1.png"
-        BufferedImage input = ImageIO.read(new File(path))
-        BufferedImage output = encryptLSB(input, data)
+        String message = Messages.LYRICS
+        byte[] data = message.getBytes()
+        String inputPath = PROJECT_PATH + "\\data\\input\\building-1.jpg"
+        String outputPath = PROJECT_PATH + "\\data\\output\\building-1.png"
+        BufferedImage input = ImageIO.read(new File(inputPath))
+        ImageIO.write(encryptLSB(input, data), "png", new File(outputPath))
+        BufferedImage output = ImageIO.read(new File(outputPath))
+        byte[] decryptedData = decryptLSB(output, message.size())
+        println(new String(decryptedData))
     }
 
     /**
@@ -40,7 +45,6 @@ class Steganography {
             int RGB = encryptedImage.getRGB(x, y)
             byte pair = (byte) ((data[i.intdiv(4)] & 0b11 << 6 - 2 * (i % 4)) >> 2 * (3 - (i % 4)))
             int encodedRGB = RGB & ~(0b11 << 8 * (2 - (i % 3))) | pair << (8 * (2 - (i % 3)))
-            println(Integer.toBinaryString(encodedRGB))
             encryptedImage.setRGB(x, y, encodedRGB)
         }
         return encryptedImage
@@ -55,10 +59,10 @@ class Steganography {
             int x = (i.intdiv(3)) % width
             int y = i.intdiv(3 * width)
             int RGB = image.getRGB(x, y)
-            println(Integer.toBinaryString(RGB))
-            //data[i.intdiv(4)] = (byte) (data[i.intdiv(4)] << 2 | 0b11 & RGB >> 8 * (2 - (i % 3)))
+            byte pair = (byte) (0b11 & RGB >> 8 * (2 - (i % 3)))
+            data[i.intdiv(4)] = (byte) (pair << 2 * (3 - (i % 4)) | data[i.intdiv(4)])
         }
-        return null
+        return data
     }
 
     /**
