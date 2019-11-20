@@ -76,8 +76,12 @@ class Steganography {
             int x = (i.intdiv(3)) % width
             int y = i.intdiv(3 * width)
             int RGB = image.getRGB(x, y)
+
+            // Gets the pair of bits from the RGB value
             byte pair = (byte) (0b11 & RGB >> 8 * (2 - (i % 3)))
-            data[i.intdiv(4)] = (byte) (pair << 2 * (3 - (i % 4)) | data[i.intdiv(4)])
+
+            // Combines the pair shifted to the correct position with the current byte
+            data[i.intdiv(4)] |= (byte) (pair << 2 * (3 - (i % 4)))
         }
         return data
     }
@@ -151,7 +155,7 @@ class Steganography {
             byte pair = (byte) (0b11 & RGB >> 8 * (2 - (i % 3)))
 
             // Places the pair of bytes in the correct position in the data
-            data[i.intdiv(4)] = (byte) (pair << 2 * (3 - (i % 4)) | data[i.intdiv(4)])
+            data[i.intdiv(4)] |= (byte) (pair << 2 * (3 - (i % 4)))
         }
         return data
     }
