@@ -8,19 +8,20 @@ class Steganography {
     private static final String PROJECT_PATH = new File("").getAbsolutePath()
 
     static void main(String[] args) {
-        String inputPath = PROJECT_PATH + "\\data\\input\\solid-1.png"
-        String outputPath = PROJECT_PATH + "\\data\\output\\solid-1.png"
+        String inputPath = PROJECT_PATH + "\\data\\input\\solid-2.png"
+        String outputPath = PROJECT_PATH + "\\data\\output\\solid.png"
+        String randomOutputPath = PROJECT_PATH + "\\data\\output\\solidRandom.png"
 
-        byte[] message = "H".getBytes()
+        byte[] message = "Handwriting is a spiritual designing, even though it appears by means of a material instrument.".getBytes()
         long seed = 104839L
 
-        BufferedImage input = ImageIO.read(new File(inputPath))
-        ImageIO.write(encryptRLSB(input, message, seed), "jpg", new File(outputPath))
+        BufferedImage baseImage = ImageIO.read(new File(inputPath))
+        ImageIO.write(encryptLSB(baseImage, message), "png", new File(outputPath))
+        ImageIO.write(encryptRLSB(baseImage, message, seed), "png", new File(randomOutputPath))
 
-        BufferedImage output = ImageIO.read(new File(outputPath))
-        byte[] data = decryptRLSB(output, message.size(), seed)
-
-        println(new String(data))
+        BufferedImage encoded = ImageIO.read(new File(outputPath))
+        BufferedImage encodedRandom = ImageIO.read(new File(randomOutputPath))
+        assert decryptLSB(encoded, message.size()) == decryptRLSB(encodedRandom, message.size(), seed)
     }
 
     /**
@@ -142,7 +143,6 @@ class Steganography {
         Set<Integer>[] usedX = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
         Set<Integer>[] usedY = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
         for (int i = 0; i < length * 4; ++i) {
-            // TODO research RLSB to see why decryption is not working
             int x = getUsableIndex(random, width, usedX[i % 3])
             int y = getUsableIndex(random, height, usedY[i % 3])
             int RGB = image.getRGB(x, y)
