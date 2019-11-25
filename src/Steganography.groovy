@@ -1,4 +1,5 @@
 import javax.imageio.ImageIO
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
 import java.awt.image.WritableRaster
@@ -8,20 +9,15 @@ class Steganography {
     private static final String PROJECT_PATH = new File("").getAbsolutePath()
 
     static void main(String[] args) {
-        String inputPath = PROJECT_PATH + "\\data\\input\\solid-2.png"
-        String outputPath = PROJECT_PATH + "\\data\\output\\solid.png"
-        String randomOutputPath = PROJECT_PATH + "\\data\\output\\solidRandom.png"
+        String inputPath = PROJECT_PATH + "\\data\\input\\nature-7.png"
+        String outputPath = PROJECT_PATH + "\\data\\output\\nature-7-encoded.png"
 
-        byte[] message = "Handwriting is a spiritual designing, even though it appears by means of a material instrument.".getBytes()
-        long seed = 104839L
-
-        BufferedImage baseImage = ImageIO.read(new File(inputPath))
-        ImageIO.write(encryptLSB(baseImage, message), "png", new File(outputPath))
-        ImageIO.write(encryptRLSB(baseImage, message, seed), "png", new File(randomOutputPath))
-
-        BufferedImage encoded = ImageIO.read(new File(outputPath))
-        BufferedImage encodedRandom = ImageIO.read(new File(randomOutputPath))
-        assert decryptLSB(encoded, message.size()) == decryptRLSB(encodedRandom, message.size(), seed)
+        BufferedImage input = ImageIO.read(new File(inputPath))
+        String message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec at sagittis tortor. Morbi at magna eget augue ornare sollicitudin. Vivamus volutpat bibendum suscipit. Nullam a massa sit amet ex porta cursus et sit amet arcu. Cras mi nunc, rhoncus vel finibus eu, dapibus ac neque. Curabitur arcu libero, vestibulum quis dolor a, maximus laoreet magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed maximus est, nec consequat arcu. Morbi vel varius est. Sed sem erat, gravida pulvinar lorem ut, dignissim finibus ex. Aenean et mi metus. Nunc ultrices fringilla venenatis."
+        long seed = -59012378894L
+        ImageIO.write(encryptRLSB(input, message.getBytes(), seed), "png", new File(outputPath))
+        BufferedImage output = ImageIO.read(new File(outputPath))
+        println(new String(decryptRLSB(output, message.size(), seed)))
     }
 
     /**
@@ -107,11 +103,11 @@ class Steganography {
         SecureRandom random = new SecureRandom(toBytes(seed))
 
         // Used arrays keep track of pixels that have already been encoded for each color (i.e. R, G, and B)
-        Set<Integer>[] usedX = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
-        Set<Integer>[] usedY = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
+        List<Integer>[] usedX = new List<Integer>[] {new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1)}
+        List<Integer>[] usedY = new List<Integer>[] {new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1)}
         for (int i = 0; i < data.length * 4; ++i) {
-            int x = getUsableIndex(random, width, usedX[i % 3])
-            int y = getUsableIndex(random, height, usedY[i % 3])
+            int x = getUsableIndex(random, usedX[i % 3])
+            int y = getUsableIndex(random, usedY[i % 3])
             int RGB = encryptedImage.getRGB(x, y)
 
             // Takes a pair of bits from a byte in the data and shifts them to the right end
@@ -144,11 +140,11 @@ class Steganography {
         SecureRandom random = new SecureRandom(toBytes(seed))
 
         // Used arrays keep track of pixels that have already been encoded for each color (i.e. R, G, and B)
-        Set<Integer>[] usedX = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
-        Set<Integer>[] usedY = new Set<Integer>[] {new HashSet<Integer>(), new HashSet<Integer>(), new HashSet<>()}
+        List<Integer>[] usedX = new List<Integer>[] {new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1)}
+        List<Integer>[] usedY = new List<Integer>[] {new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1)}
         for (int i = 0; i < length * 4; ++i) {
-            int x = getUsableIndex(random, width, usedX[i % 3])
-            int y = getUsableIndex(random, height, usedY[i % 3])
+            int x = getUsableIndex(random, usedX[i % 3])
+            int y = getUsableIndex(random, usedY[i % 3])
             int RGB = image.getRGB(x, y)
 
             // Gets the pair of bytes from one of the color channels and shifts it to the right
@@ -176,6 +172,18 @@ class Steganography {
         }
         used.add(index)
         return index
+    }
+
+    /**
+     * Gets a random index available from a list of indeces. Once this index is retreived,
+     * it is removed from the list.
+     * @param root the source of the random index
+     * @param available the list of indeces which have not been used
+     * @return a random, usable index
+     */
+    private static int getUsableIndex(SecureRandom root, List<Integer> available) {
+        int index = root.nextInt(available.size())
+        return available.remove(index)
     }
 
     /**
@@ -207,5 +215,26 @@ class Steganography {
         ColorModel model = image.getColorModel()
         WritableRaster raster = image.copyData(image.getRaster().createCompatibleWritableRaster())
         return new BufferedImage(model, raster, model.isAlphaPremultiplied(), null)
+    }
+
+    /**
+     * Converts an RGB value into a YCbCr value. Conversion is done by applying a Matrix transformation
+     * onto an RGB vector. The YCbCr color space separates the luminance (lightness/darkness) from the
+     * chrominance (color) of a pixel; this makes the DCT transformation of an image in this color space
+     * possible.
+     * <a href="https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion#JPEG_conversion">Source</a>
+     * @param RGB the encoded RGB value as an int
+     * @return an array of Numbers representing the YCbCr encoding of the RGB value
+     */
+    private static Number[] getYCbCr(int RGB) {
+        Color color = new Color(RGB)
+        int red = color.getRed()
+        int green = color.getGreen()
+        int blue = color.getBlue()
+        return [
+                         0.299 * red    + 0.587 * green    + 0.114 * blue,  // Y
+                128 - 0.168736 * red - 0.331264 * green      + 0.5 * blue,  // Cb
+                128      + 0.5 * red - 0.418688 * green - 0.081312 * blue   // Cr
+        ]
     }
 }
