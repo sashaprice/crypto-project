@@ -12,12 +12,8 @@ class Steganography {
         String inputPath = PROJECT_PATH + "\\data\\input\\nature-7.png"
         String outputPath = PROJECT_PATH + "\\data\\output\\nature-7-encoded.png"
 
-        BufferedImage input = ImageIO.read(new File(inputPath))
-        String message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec at sagittis tortor. Morbi at magna eget augue ornare sollicitudin. Vivamus volutpat bibendum suscipit. Nullam a massa sit amet ex porta cursus et sit amet arcu. Cras mi nunc, rhoncus vel finibus eu, dapibus ac neque. Curabitur arcu libero, vestibulum quis dolor a, maximus laoreet magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed maximus est, nec consequat arcu. Morbi vel varius est. Sed sem erat, gravida pulvinar lorem ut, dignissim finibus ex. Aenean et mi metus. Nunc ultrices fringilla venenatis."
-        long seed = -59012378894L
-        ImageIO.write(encryptRLSB(input, message.getBytes(), seed), "png", new File(outputPath))
-        BufferedImage output = ImageIO.read(new File(outputPath))
-        println(new String(decryptRLSB(output, message.size(), seed)))
+        BufferedImage image = ImageIO.read(new File(inputPath))
+        // TODO For DCT steganography, see Jsteg
     }
 
     /**
@@ -224,17 +220,15 @@ class Steganography {
      * possible.
      * <a href="https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion#JPEG_conversion">Source</a>
      * @param RGB the encoded RGB value as an int
-     * @return an array of Numbers representing the YCbCr encoding of the RGB value
+     * @return an array of Number s representing the YCbCr encoding of the RGB value
      */
     private static Number[] getYCbCr(int RGB) {
         Color color = new Color(RGB)
         int red = color.getRed()
         int green = color.getGreen()
         int blue = color.getBlue()
-        return [
-                         0.299 * red    + 0.587 * green    + 0.114 * blue,  // Y
-                128 - 0.168736 * red - 0.331264 * green      + 0.5 * blue,  // Cb
-                128      + 0.5 * red - 0.418688 * green - 0.081312 * blue   // Cr
-        ]
+        return [0.299 * red + 0.587 * green + 0.114 * blue,             // Y
+                128 - 0.168736 * red - 0.331264 * green + 0.5 * blue,   // Cb
+                128 + 0.5 * red - 0.418688 * green - 0.081312 * blue]   // Cr
     }
 }
