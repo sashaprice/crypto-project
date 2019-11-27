@@ -91,24 +91,6 @@ class Steganography {
     }
 
     /**
-     * Finds an index that has not been used to encode data in an image. Once a suitable
-     * index has been found, it is added to the set of used indeces.
-     *
-     * @param root the source of the random indeces
-     * @param size the range of indeces to be generated
-     * @param used the set of indeces that have already been used
-     * @return an unused index within the range of the given size
-     */
-    private static int getUsableIndex(SecureRandom root, int size, Set<Integer> used) {
-        int index = root.nextInt(size)
-        while (used.contains(index)) {
-            index = root.nextInt(size)
-        }
-        used.add(index)
-        return index
-    }
-
-    /**
      * Gets a random index available from a list of indeces. Once this index is retreived,
      * it is removed from the list.
      * @param root the source of the random index
@@ -116,8 +98,7 @@ class Steganography {
      * @return a random, usable index
      */
     private static int getUsableIndex(SecureRandom root, List<Integer> available) {
-        int index = root.nextInt(available.size())
-        return available.remove(index)
+        return available.remove(root.nextInt(available.size()))
     }
 
     /**
