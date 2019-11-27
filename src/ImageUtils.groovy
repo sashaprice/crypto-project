@@ -44,11 +44,11 @@ class StegUtils {
         for (int i = 0; i < DCT_BLOCK_SIZE; ++i) {
             for (int j = 0; j < DCT_BLOCK_SIZE; ++j) {
                 Number sum = 0
-                for (int k = 0; k < DCT_BLOCK_SIZE; ++k) {
-                    for (int l = 0; l < DCT_BLOCK_SIZE; ++l) {
-                        sum += matrix[k][l]
-                            * Math.cos((2 * k + 1) * i * Math.PI / (2 * DCT_BLOCK_SIZE))
-                            * Math.cos((2 * l + 1) * j * Math.PI / (2 * DCT_BLOCK_SIZE))
+                for (int x = 0; x < DCT_BLOCK_SIZE; ++x) {
+                    for (int y = 0; y < DCT_BLOCK_SIZE; ++y) {
+                        sum += matrix[x][y]
+                            * Math.cos((2 * x + 1) * i * Math.PI / (2 * DCT_BLOCK_SIZE))
+                            * Math.cos((2 * y + 1) * j * Math.PI / (2 * DCT_BLOCK_SIZE))
                     }
                 }
                 dct[i][j] = (i == 0 ? 1 : Math.sqrt(2)) * (j == 0 ? 1 : Math.sqrt(2)) * sum / DCT_BLOCK_SIZE
