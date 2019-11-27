@@ -1,4 +1,9 @@
-class StegUtils {
+import java.awt.Color
+import java.awt.image.BufferedImage
+import java.awt.image.ColorModel
+import java.awt.image.WritableRaster
+
+class ImageUtils {
     private static final int DCT_BLOCK_SIZE = 8
     
     /**
@@ -40,7 +45,6 @@ class StegUtils {
     private static Number[][] discreteCosineTransform(int[][] matrix) {
         assert matrix.length == DCT_BLOCK_SIZE && matrix.every { it.length == DCT_BLOCK_SIZE }
         Number[][] dct = new Number[DCT_BLOCK_SIZE][DCT_BLOCK_SIZE]
-        
         for (int i = 0; i < DCT_BLOCK_SIZE; ++i) {
             for (int j = 0; j < DCT_BLOCK_SIZE; ++j) {
                 Number sum = 0
@@ -55,12 +59,30 @@ class StegUtils {
                 if (i != 0 ^ j != 0) {
                     c *= Math.sqrt(2)
                 }
-                else if (i == 0 && j == 0) {
+                else if (i != 0 && j != 0) {
                     c *= 2
                 }
                 dct[i][j] = c
             }
         }
         return dct
+    }
+
+    /**
+     * Converts a long value into an array of bytes. In Java, longs are 8 bytes, so the
+     * resulting array should have exactly 8 elements.
+     *
+     * @param value the long value to convert to bytes
+     * @return an array of bytes from the long value
+     */
+    static byte[] toBytes(long value) {
+        final int LONG_LENGTH = 8
+        final int BYTE_LENGTH = 8
+        byte[] result = new byte[LONG_LENGTH]
+        for (int i = 0; i < LONG_LENGTH; ++i) {
+            result[i] = (byte) (value & 0xFF)
+            value >>= BYTE_LENGTH
+        }
+        return result
     }
 }
