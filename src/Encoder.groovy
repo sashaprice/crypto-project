@@ -14,7 +14,7 @@ class Encoder {
         int height = image.height
         int width = image.width
         assert height * width >= (4 * data.length / 3)
-        BufferedImage encryptedImage = deepCopy(image)
+        BufferedImage encryptedImage = ImageUtils.deepCopy(image)
 
         // SecureRandom is used to keep the selection pattern undetectable
         SecureRandom random = new SecureRandom(toBytes(seed))
