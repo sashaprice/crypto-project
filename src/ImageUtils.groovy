@@ -1,4 +1,6 @@
 class StegUtils {
+    private static final int DCT_BLOCK_SIZE = 8
+    
     /**
      * Creates a deep copy of a buffered image suitable for transformation. This is used
      * to avoid modifying the original image when creating an enciphered image.
