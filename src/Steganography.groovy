@@ -41,8 +41,8 @@ class Steganography {
         List<Integer>[] usedX = new List<Integer>[] {new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1)}
         List<Integer>[] usedY = new List<Integer>[] {new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1)}
         for (int i = 0; i < data.length * 4; ++i) {
-            int x = getUsableIndex(random, usedX[i % 3])
-            int y = getUsableIndex(random, usedY[i % 3])
+            int x = usedX[i % 3].remove(random.nextInt(usedX[i % 3].size()))
+            int y = usedY[i % 3].remove(random.nextInt(usedY[i % 3].size()))
             int RGB = encryptedImage.getRGB(x, y)
 
             // Takes a pair of bits from a byte in the data and shifts them to the right end
@@ -78,8 +78,8 @@ class Steganography {
         List<Integer>[] usedX = new List<Integer>[] {new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1)}
         List<Integer>[] usedY = new List<Integer>[] {new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1), new ArrayList<>(0..height - 1)}
         for (int i = 0; i < length * 4; ++i) {
-            int x = getUsableIndex(random, usedX[i % 3])
-            int y = getUsableIndex(random, usedY[i % 3])
+            int x = usedX[i % 3].remove(random.nextInt(usedX[i % 3].size()))
+            int y = usedY[i % 3].remove(random.nextInt(usedY[i % 3].size()))
             int RGB = image.getRGB(x, y)
 
             // Gets the pair of bytes from one of the color channels and shifts it to the right
@@ -89,17 +89,6 @@ class Steganography {
             data[i.intdiv(4)] |= (byte) (pair << 2 * (3 - (i % 4)))
         }
         return data
-    }
-
-    /**
-     * Gets a random index available from a list of indeces. Once this index is retreived,
-     * it is removed from the list.
-     * @param root the source of the random index
-     * @param available the list of indeces which have not been used
-     * @return a random, usable index
-     */
-    private static int getUsableIndex(SecureRandom root, List<Integer> available) {
-        return available.remove(root.nextInt(available.size()))
     }
 
     /**
