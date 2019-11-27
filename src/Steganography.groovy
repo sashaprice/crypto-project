@@ -146,8 +146,9 @@ class Steganography {
         int red = color.getRed()
         int green = color.getGreen()
         int blue = color.getBlue()
-        return [0.299 * red + 0.587 * green + 0.114 * blue,             // Y
-                128 - 0.168736 * red - 0.331264 * green + 0.5 * blue,   // Cb
-                128 + 0.5 * red - 0.418688 * green - 0.081312 * blue]   // Cr
+        int Y = (int) (0.299 * red + 0.587 * green + 0.114 * blue)
+        int Cb = (int) (128 - 0.168736 * red - 0.331264 * green + 0.5 * blue)
+        int Cr = (int) (128 + 0.5 * red - 0.418688 * green - 0.081312 * blue)
+        return Y << 16 | Cb << 8 | Cr
     }
 }
