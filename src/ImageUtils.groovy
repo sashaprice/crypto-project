@@ -43,9 +43,6 @@ class StegUtils {
         
         for (int i = 0; i < DCT_BLOCK_SIZE; ++i) {
             for (int j = 0; j < DCT_BLOCK_SIZE; ++j) {
-                Number ci = (i == 0 ? 1 : Math.sqrt(2)) / Math.sqrt(DCT_BLOCK_SIZE)
-                Number cj = (j == 0 ? 1 : Math.sqrt(2)) / Math.sqrt(DCT_BLOCK_SIZE)
-                
                 Number sum = 0
                 for (int k = 0; k < DCT_BLOCK_SIZE; ++k) {
                     for (int l = 0; l < DCT_BLOCK_SIZE; ++l) {
