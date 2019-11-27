@@ -7,6 +7,7 @@ import java.security.SecureRandom
 
 class Steganography {
     private static final String PROJECT_PATH = new File("").getAbsolutePath()
+    private static final int DCT_BLOCK_SIZE = 8
 
     static void main(String[] args) {
         String inputPath = PROJECT_PATH + "\\data\\input\\nature-7.png"
@@ -150,5 +151,34 @@ class Steganography {
         int Cb = (int) (128 - 0.168736 * red - 0.331264 * green + 0.5 * blue)
         int Cr = (int) (128 + 0.5 * red - 0.418688 * green - 0.081312 * blue)
         return Y << 16 | Cb << 8 | Cr
+    }
+    
+    /**
+     * Performs a discrete cosine transform on an 8x8 matrix of integer values.
+     * <a href="https://www.geeksforgeeks.org/discrete-cosine-transform-algorithm-program/">Source</a>
+     * @param matrix the matrix of integer values
+     * @return the resulting matrix of DCT values
+     */
+    private static Number[][] discreteCosineTransform(int[][] matrix) {
+        assert matrix.length == DCT_BLOCK_SIZE && matrix.every { it.length == DCT_BLOCK_SIZE }
+        Number[][] dct = new Number[DCT_BLOCK_SIZE][DCT_BLOCK_SIZE]
+        
+        for (int i = 0; i < DCT_BLOCK_SIZE; ++i) {
+            for (int j = 0; j < DCT_BLOCK_SIZE; ++j) {
+                Number ci = (i == 0 ? 1 : Math.sqrt(2)) / Math.sqrt(DCT_BLOCK_SIZE)
+                Number cj = (j == 0 ? 1 : Math.sqrt(2)) / Math.sqrt(DCT_BLOCK_SIZE)
+                
+                Number sum = 0
+                for (int k = 0; k < DCT_BLOCK_SIZE; ++k) {
+                    for (int l = 0; l < DCT_BLOCK_SIZE; ++l) {
+                        sum += matrix[k][l]
+                            * Math.cos((2 * k + 1) * i * Math.PI / (2 * DCT_BLOCK_SIZE))
+                            * Math.cos((2 * l + 1) * j * Math.PI / (2 * DCT_BLOCK_SIZE))
+                    }
+                }
+                dct[i][j] = ci * cj * sum
+            }
+        }
+        return dct
     }
 }
