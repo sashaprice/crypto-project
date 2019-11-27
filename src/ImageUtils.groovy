@@ -22,6 +22,7 @@ class ImageUtils {
     /**
      * Converts an RGB value into the YCbCr color space. The alpha channel from
      * the RGB is preserved in the return value.
+     *
      * @param RGB the RGB value to convert
      * @return the corresponding YCbCr value
      */
@@ -39,6 +40,7 @@ class ImageUtils {
     /**
      * Performs a discrete cosine transform on an 8x8 matrix of integer values.
      * <a href="https://www.geeksforgeeks.org/discrete-cosine-transform-algorithm-program/">Source</a>
+     *
      * @param matrix the matrix of integer values
      * @return the resulting matrix of DCT values
      */
