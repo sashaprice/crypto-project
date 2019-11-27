@@ -129,9 +129,9 @@ class Steganography {
      * possible.
      * <a href="https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.709_conversion#JPEG_conversion">Source</a>
      * @param RGB the encoded RGB value as an int
-     * @return an array of Number s representing the YCbCr encoding of the RGB value
+     * @return an int representing the YCbCr encoding of the RGB value with the preserved alpha channel
      */
-    private static Number[] getYCbCr(int RGB) {
+    private static int getYCbCr(int RGB) {
         Color color = new Color(RGB)
         int red = color.getRed()
         int green = color.getGreen()
@@ -139,7 +139,7 @@ class Steganography {
         int Y = (int) (0.299 * red + 0.587 * green + 0.114 * blue)
         int Cb = (int) (128 - 0.168736 * red - 0.331264 * green + 0.5 * blue)
         int Cr = (int) (128 + 0.5 * red - 0.418688 * green - 0.081312 * blue)
-        return Y << 16 | Cb << 8 | Cr
+        return RGB & 0xFF000000 | Y << 16 | Cb << 8 | Cr
     }
     
     /**
