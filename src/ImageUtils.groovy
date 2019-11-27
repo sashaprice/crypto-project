@@ -52,7 +52,7 @@ class StegUtils {
                             * Math.cos((2 * l + 1) * j * Math.PI / (2 * DCT_BLOCK_SIZE))
                     }
                 }
-                dct[i][j] = ci * cj * sum
+                dct[i][j] = (i == 0 ? 1 : Math.sqrt(2)) * (j == 0 ? 1 : Math.sqrt(2)) * sum / DCT_BLOCK_SIZE
             }
         }
         return dct
