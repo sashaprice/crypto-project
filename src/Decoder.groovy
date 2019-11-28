@@ -19,7 +19,7 @@ class Decoder {
         byte[] data = new byte[length]
 
         // SecureRandom is used to keep the selection pattern undetectable
-        SecureRandom random = new SecureRandom(ImageUtils.toBytes(seed))
+        SecureRandom random = new SecureRandom(MathUtils.toBytes(seed))
 
         // Used arrays keep track of pixels that have already been encoded for each color (i.e. R, G, and B)
         List<Integer>[] usedX = new List<Integer>[] {new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1), new ArrayList<>(0..width - 1)}
