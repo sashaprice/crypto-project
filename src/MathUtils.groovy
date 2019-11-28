@@ -1,12 +1,20 @@
 class MathUtils {
+    public static final Number[][] Q50_MATRIX = [[16, 11, 10, 16, 24,  40,  51,  61],
+                                                 [12, 12, 14, 19, 26,  58,  60,  55],
+                                                 [14, 13, 16, 24, 40,  57,  69,  56],
+                                                 [14, 17, 22, 29, 51,  87,  80,  62],
+                                                 [18, 22, 37, 56, 68,  109, 103, 77],
+                                                 [24, 35, 55, 64, 81,  104, 113, 92],
+                                                 [49, 64, 78, 87, 103, 121, 120, 101],
+                                                 [72, 92, 95, 98, 112, 110, 103, 99]]
+
     /**
      * Performs a discrete cosine transform on an 8x8 matrix of integer values.
-     * <a href="https://www.math.cuhk.edu.hk/~lmlui/dct.pdf">Source</a>
      *
      * @param p the matrix of integer values
      * @return the resulting matrix of DCT values
      */
-    private static Number[][] discreteCosineTransform(int[][] p) {
+    static Number[][] discreteCosineTransform(int[][] p) {
         assert p.length == 8 && p.every { it.length == 8 }
         Number[][] dct = new Number[8][8]
         for (int i = 0; i < 8; ++i) {
@@ -17,6 +25,15 @@ class MathUtils {
         return dct
     }
 
+    /**
+     * Finds the DCT value at the i, jth index of an 8x8 matrix based off the formula
+     * given by <a href="https://www.math.cuhk.edu.hk/~lmlui/dct.pdf">this source</a>.
+     *
+     * @param p the matrix of values
+     * @param i the ith index
+     * @param j the jth index
+     * @return the result of the DCT
+     */
     private static Number D(int[][] p, int i, int j) {
         Number sum = 0
         for (int x = 0; x < 8; ++x) {
@@ -29,6 +46,12 @@ class MathUtils {
         return C(i) * C(j) * sum / 4
     }
 
+    /**
+     * Determines the value of the coefficient for the given index.
+     *
+     * @param u the index
+     * @return the calculated coefficient
+     */
     private static Number C(int u) {
         return u == 0 ? 1 / Math.sqrt(2) : 1
     }

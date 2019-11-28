@@ -1,3 +1,6 @@
+import org.apache.commons.math3.linear.MatrixUtils
+import org.apache.commons.math3.linear.RealMatrix
+
 import java.awt.image.BufferedImage
 import java.security.SecureRandom
 
@@ -38,5 +41,58 @@ class Encoder {
             encryptedImage.setRGB(x, y, encodedRGB)
         }
         return encryptedImage
+    }
+
+    static void main(String[] args) {
+        int[][] M = [[26, -5, -5, -5, -5, -5, -5, 8],
+        [64, 52, 8, 26, 26, 26, 8, -18],
+        [126, 70, 26, 26, 52, 26, -5, -5],
+        [111, 52, 8, 52, 52, 38, -5, -5],
+        [52, 26, 8, 39, 38, 21, 8, 8],
+        [0, 8, -5, 8, 26, 52, 70, 26],
+        [-5, -23, -18, 21, 8, 8, 52, 38],
+        [-18, 8, -5, -5, -5, 8, 26, 8]]
+    }
+
+    static BufferedImage encodeDCT(BufferedImage image, byte[] data) {
+        BufferedImage encodedImage = ImageUtils.deepCopy(image)
+        int width = encodedImage.width
+        int height = encodedImage.height
+
+        // First component: luminance
+        for (int x = 0; x < width; x += 8) {
+            for (int y = 0; y < height; y += 8) {
+                int[][] block = getBlock(image, x, y)
+                for (int i = 0; i < width; ++i) {
+                    for (int j = 0; j < height; ++j) {
+                        block[i][j] = (block[i][j] >> 16) & 0xFF
+                    }
+                }
+                int[][] C = quantizeBlock(block)
+            }
+        }
+        return encodedImage
+    }
+
+    private static int[][] quantizeBlock(int[][] block) {
+        Number[][] D = MathUtils.discreteCosineTransform(block)
+        int[][] C = new int[8][8]
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                C[i][j] = Math.round(D[i][j] / MathUtils.Q50_MATRIX[i][j]) as int
+            }
+        }
+        return C
+    }
+
+    private static int[][] getBlock(BufferedImage image, int i, int j) {
+        int[][] pixels = new int[8][8]
+        for (int x = i; x < i + 8; ++x) {
+            for (int y = j; y < j + 8; ++y) {
+                int RGB = x < image.width && y < image.height ? image.getRGB(x, y) : 0xFF000000
+                pixels[x][y] = ImageUtils.toYCbCr(RGB) - 128
+            }
+        }
+        return pixels
     }
 }
