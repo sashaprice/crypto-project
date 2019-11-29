@@ -14,7 +14,7 @@ class MathUtils {
      * @param p the matrix of integer values
      * @return the resulting matrix of DCT values
      */
-    static Number[][] discreteCosineTransform(int[][] p) {
+    static Number[][] discreteCosineTransform(Number[][] p) {
         assert p.length == 8 && p.every { it.length == 8 }
         Number[][] dct = new Number[8][8]
         for (int i = 0; i < 8; ++i) {
@@ -34,7 +34,7 @@ class MathUtils {
      * @param j the jth index
      * @return the result of the DCT
      */
-    private static Number D(int[][] p, int i, int j) {
+    private static Number D(Number[][] p, int i, int j) {
         Number sum = 0
         for (int x = 0; x < 8; ++x) {
             for (int y = 0; y < 8; ++y) {
