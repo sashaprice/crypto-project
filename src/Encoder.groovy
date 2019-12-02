@@ -66,9 +66,6 @@ class Encoder {
                 yCbCrColorSpace[i][j] = ImageUtils.toYCbCr(channels)
             }
         }
-        JPEGImage jpegImage = new JPEGImage(yCbCrColorSpace)
-        BufferedImage compressed = jpegImage.toRGBImage(width, height)
-        ImageIO.write(compressed, "png", new File(new File("").getAbsolutePath() + "\\data\\output\\test.png"))
         return null
     }
 }

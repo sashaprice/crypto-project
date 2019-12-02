@@ -23,31 +23,16 @@ class ImageUtils {
      * @param RGB the RGB value to convert
      * @return the corresponding YCbCr value
      */
-    static Number[] toYCbCr(int[] RGB) {
+    static double[] toYCbCr(int[] RGB) {
         int R = RGB[1]
         int G = RGB[2]
         int B = RGB[3]
-        Number Y = 0.299 * R + 0.587 * G + 0.114 * B
-        Number Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B
-        Number Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B
-        if (Y > 255) {
-            Y = 255
-        }
-        else if (Y < 0) {
-            Y = 0
-        }
-        else if (Cb > 255) {
-            Cb = 255
-        }
-        else if (Cb < 0) {
-            Cb = 0
-        }
-        else if (Cr > 255) {
-            Cr = 255
-        }
-        else if (Cr < 0) {
-            Cr = 0
-        }
+        double Y = 0.299 * R + 0.587 * G + 0.114 * B
+        double Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B
+        double Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B
+        Y = Math.min(Math.max(Y, 0d), 255d)
+        Cb = Math.min(Math.max(Cb, 0d), 255d)
+        Cr = Math.min(Math.max(Cb, 0d), 255d)
         return [RGB[0], Y, Cb, Cr]
     }
 
@@ -58,13 +43,13 @@ class ImageUtils {
      * @param YCbCr the YCbCr value to convert
      * @return the corresponding RGB value
      */
-    static int[] toRGB(Number[] YCbCr) {
-        Number Y = YCbCr[1]
-        Number Cb = YCbCr[2]
-        Number Cr = YCbCr[3]
-        int R = (int) Math.round(Y + 1.402 * (Cr - 128) as BigDecimal)
-        int G = (int) Math.round(Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128) as BigDecimal)
-        int B = (int) Math.round(Y + 1.772 * (Cb - 128) as BigDecimal)
+    static int[] toRGB(double[] YCbCr) {
+        double Y = YCbCr[1]
+        double Cb = YCbCr[2]
+        double Cr = YCbCr[3]
+        int R = (int) Math.round(Y + 1.402 * (Cr - 128))
+        int G = (int) Math.round(Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128))
+        int B = (int) Math.round(Y + 1.772 * (Cb - 128))
         return [YCbCr[0] as int, R, G, B]
     }
 
@@ -79,7 +64,7 @@ class ImageUtils {
         return [(RGB & 0xFF000000) >> 24, (RGB & 0xFF0000) >> 16, (RGB & 0xFF00) >> 8, RGB & 0xFF]
     }
 
-    static int channelRGB(int[] RGB) {
+    static int channelInt(int[] RGB) {
         return RGB[0] << 24 | RGB[1] << 16 | RGB[2] << 8 | RGB[3]
     }
 }
