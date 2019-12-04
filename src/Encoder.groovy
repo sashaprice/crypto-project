@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.security.SecureRandom
 
@@ -41,31 +40,25 @@ class Encoder {
         return encryptedImage
     }
 
-    static void main(String[] args) {
-        String path = new File("").getAbsolutePath() + "\\data\\input\\solid-1.png"
-        BufferedImage image = ImageIO.read(new File(path))
-        encodeDCT(image, null)
+    static JPEGImage encodeDCT(JPEGImage image, byte[] data) {
+        int width = image.width + Math.floorMod(8 - image.width, 8)
+        int height = image.height + Math.floorMod(8 - image.height, 8)
 
-    }
+        JPEGImage encodedImage = ImageUtils.deepCopy(image)
 
-    static BufferedImage encodeDCT(BufferedImage image, byte[] data) {
-        int width = image.width
-        int height = image.height
+        for (int i = 0, bit = 0; bit < data.length * 8; ++i) {
+            int x = i % width
+            int y = i.intdiv(width)
 
-        // Converts image into a YCbCr color space and ensures image dimensions are multiples of 8
-        Number[][][] yCbCrColorSpace = new Number[width + Math.floorMod(8 - width, 8)][height + Math.floorMod(8 - height, 8)]
-        for (int i = 0; i < yCbCrColorSpace.length; ++i) {
-            for (int j = 0; j < yCbCrColorSpace[i].length; ++j) {
-                int[] channels
-                if (i < width && j < height) {
-                    channels = ImageUtils.channelArray(image.getRGB(i, j))
-                }
-                else {
-                    channels = [0xFF, 0, 0, 0]
-                }
-                yCbCrColorSpace[i][j] = ImageUtils.toYCbCr(channels)
+            // Avoids encoding the direct current
+            if (x % 8 == 0 || y % 8 == 0 || encodedImage.getY(x, y) in (-1..1)) {
+                continue
             }
+
+            int value = (data[bit.intdiv(8)] >> (7 - bit % 8)) & 1
+            encodedImage.setY(x, y, (encodedImage.getY(x, y) & ~1) | value)
+            bit += 1
         }
-        return null
+        return encodedImage
     }
 }

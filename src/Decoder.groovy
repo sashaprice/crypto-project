@@ -37,4 +37,24 @@ class Decoder {
         }
         return data
     }
+
+    static byte[] decodeDCT(JPEGImage image, long length) {
+        int width = image.width + Math.floorMod(8 - image.width, 8)
+        int height = image.height + Math.floorMod(8 - image.height, 8)
+
+        byte[] data = new byte[length]
+
+        for (int i = 0, bit = 0; bit < length * 8; ++i) {
+            int x = i % width
+            int y = i.intdiv(width)
+
+            if (x % 8 == 0 || y % 8 == 0 || image.getY(x, y) in (-1..1)) {
+                continue
+            }
+
+            data[bit.intdiv(8)] |= (image.getY(x, y) & 1) << (7 - bit % 8)
+            bit += 1
+        }
+        return data
+    }
 }

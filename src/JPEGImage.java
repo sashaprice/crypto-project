@@ -1,9 +1,18 @@
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
+/**
+ * This class compresses an image via the JPEG compression algorithm to
+ * get around  the lack of support of direct editing of DCT coefficients.
+ * By doing so, quantized values can be edited to embed steganographic
+ * messages into images.
+ *
+ * @author Sasha Price, Shannon Hire, Timmy Higgins
+ */
 public class JPEGImage {
+    /**
+     * A matrix of quantization values established by JPEG for an ideal
+     * ratio of compression to image quality.
+     */
     private static final int[][] Q50_MATRIX = {{16, 11, 10, 16, 24,  40,  51,  61},
                                                {12, 12, 14, 19, 26,  58,  60,  55},
                                                {14, 13, 16, 24, 40,  57,  69,  56},
@@ -21,6 +30,23 @@ public class JPEGImage {
     private int width;
     private int height;
 
+    /**
+     * Reads in a matrix of yCbCr color channels and encodes into a
+     * compressed JPEG image.
+     *
+     * @param yCbCrData the data of the image
+     */
+    public JPEGImage(double[][][] yCbCrData) {
+        read(yCbCrData);
+    }
+
+    /**
+     * Takes a BufferedImage and converts the RGB values into a matrix of
+     * yCbCr channels. The yCbCr channels are then compressed by the
+     * JPEG algorithm.
+     *
+     * @param image the image to encode into JPEG
+     */
     public JPEGImage(BufferedImage image) {
         double[][][] yCbCrData = new double[image.getHeight()][image.getWidth()][];
         for (int x = 0; x < image.getWidth(); ++x) {
@@ -48,7 +74,7 @@ public class JPEGImage {
 
         width = data[0].length;
         height = data.length;
-        // Extends width/height to the lowest multiple of 8 greater than width/height
+        // Extends width/height to the lowest multiple of 8 <= width/height
         int extWidth = width + Math.floorMod(8 - width, 8);
         int extHeight = height + Math.floorMod(8 - height, 8);
 
@@ -61,7 +87,7 @@ public class JPEGImage {
         for (int x = 0; x < extHeight; ++x) {
             for (int y = 0; y < extWidth; ++y) {
                 if (x < height && y < width) {
-                    alphaChannel[x][y] = Math.min((int) data[x][y][0], 255);
+                    alphaChannel[x][y] = (int) data[x][y][0];
                     yPlane[x][y] = data[x][y][1];
                     cBPlane[x][y] = data[x][y][2];
                     cRPlane[x][y] = data[x][y][3];

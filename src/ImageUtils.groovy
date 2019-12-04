@@ -1,8 +1,21 @@
+import org.apache.commons.math3.linear.MatrixUtils
+import org.apache.commons.math3.linear.RealMatrix
+
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
 import java.awt.image.WritableRaster
 
 class ImageUtils {
+    private static final RealMatrix CONVERSION_MATRIX = MatrixUtils.createRealMatrix(
+            [[    0.299,     0.587,     0.114],
+             [-0.168736, -0.331264,       0.5],
+             [      0.5, -0.418688, -0.081312]] as double[][]
+    )
+
+    private static final RealMatrix SHIFT = MatrixUtils.createRealMatrix(
+            [[0], [128], [128]] as double[][]
+    )
+
     /**
      * Creates a deep copy of a buffered image suitable for transformation. This is used
      * to avoid modifying the original image when creating an enciphered image.
@@ -15,6 +28,32 @@ class ImageUtils {
         WritableRaster raster = image.copyData(image.getRaster().createCompatibleWritableRaster())
         return new BufferedImage(model, raster, model.isAlphaPremultiplied(), null)
     }
+
+    /**
+     * Creates a deep copy of a JPEGImage. Dimensions are maintained,
+     * and copies the data for alpha, y, Cb, and Cr channels.
+     *
+     * @param image the image to copy
+     * @return a deep copy of the image
+     */
+    static JPEGImage deepCopy(JPEGImage image) {
+        JPEGImage copy = new JPEGImage(new double[image.height][image.width][4])
+        int width = image.width + Math.floorMod(8 - image.width, 8)
+        int height = image.height + Math.floorMod(8 - image.height, 8)
+        for (int i = 0; i < width; ++i) {
+            for (int j = 0; j < height; ++j) {
+                copy.setAlpha(i, j, image.getAlpha(i, j))
+                copy.setY(i, j, image.getY(i, j))
+            }
+        }
+        for (int i = 0; i < width.intdiv(2); ++i) {
+            for (int j = 0; j < height.intdiv(2); ++j) {
+                copy.setCb(i, j, image.getCb(i, j))
+                copy.setCr(i, j, image.getCr(i, j))
+            }
+        }
+        return copy
+    }
     
     /**
      * Converts an RGB value into the YCbCr color space. The alpha channel from
@@ -24,16 +63,9 @@ class ImageUtils {
      * @return the corresponding YCbCr value
      */
     static double[] toYCbCr(int[] RGB) {
-        int R = RGB[1]
-        int G = RGB[2]
-        int B = RGB[3]
-        double Y = 0.299 * R + 0.587 * G + 0.114 * B
-        double Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B
-        double Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B
-        Y = Math.min(Math.max(Y, 0d), 255d)
-        Cb = Math.min(Math.max(Cb, 0d), 255d)
-        Cr = Math.min(Math.max(Cb, 0d), 255d)
-        return [RGB[0], Y, Cb, Cr]
+        double[][] input = [[RGB[1]], [RGB[2]], [RGB[3]]]
+        RealMatrix output = (CONVERSION_MATRIX * MatrixUtils.createRealMatrix(input)).add(SHIFT)
+        return [RGB[0]] + output.getData().collect(x -> x[0]) as double[]
     }
 
     /**
@@ -44,13 +76,9 @@ class ImageUtils {
      * @return the corresponding RGB value
      */
     static int[] toRGB(double[] YCbCr) {
-        double Y = YCbCr[1]
-        double Cb = YCbCr[2]
-        double Cr = YCbCr[3]
-        int R = (int) Math.round(Y + 1.402 * (Cr - 128))
-        int G = (int) Math.round(Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128))
-        int B = (int) Math.round(Y + 1.772 * (Cb - 128))
-        return [YCbCr[0] as int, R, G, B]
+        double[][] input = [[YCbCr[1]], [YCbCr[2]], [YCbCr[3]]]
+        RealMatrix output = MatrixUtils.inverse(CONVERSION_MATRIX) * MatrixUtils.createRealMatrix(input).subtract(SHIFT)
+        return [YCbCr[0] as int] + output.getData().collect(x -> Math.round(x[0])) as int[]
     }
 
     /**

@@ -3,6 +3,9 @@ import org.apache.commons.math3.linear.RealMatrix
 
 class MathUtils {
 
+    /**
+     * The basis matrix for performing an 8x8 DCT on another matrix.
+     */
     private static final RealMatrix DCT_BASIS
     static {
         double[][] temp = new double[8][8]
@@ -15,9 +18,11 @@ class MathUtils {
     }
 
     /**
-     * Performs a discrete cosine transform on an 8x8 matrix of integer values.
+     * Performs a discrete cosine transform on an 8x8 matrix of values. DCT
+     * is evaluated as ThT', where T is the basis of transformation for a
+     * DCT, and h is the matrix to transform.
      *
-     * @param h the matrix of integer values
+     * @param h the matrix of values
      * @return the resulting matrix of DCT values
      */
     static double[][] DCT(double[][] h) {
@@ -25,6 +30,14 @@ class MathUtils {
         return (DCT_BASIS * MatrixUtils.createRealMatrix(h) * MatrixUtils.inverse(DCT_BASIS)).getData()
     }
 
+    /**
+     * Performs an inverse discrete cosine transform on an 8x8 matrix of values.
+     * DCT is evaluated as T'HT, where T is the basis of transformation for a
+     * DCT, and H is the transformed matrix.
+     *
+     * @param H the transformed matrix
+     * @return the original matrix from a DCT
+     */
     static double[][] IDCT(double[][] H) {
         assert H.length == 8 && H.every { it.length == 8 }
         return (MatrixUtils.inverse(DCT_BASIS) * MatrixUtils.createRealMatrix(H) * DCT_BASIS).getData()
